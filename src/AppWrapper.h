@@ -26,7 +26,7 @@ void uWS_App_ws(const FunctionCallbackInfo<Value> &args) {
 
     /* pattern, behavior */
     if (missingArguments(2, args)) {
-        return;
+        //return;
     }
 
     Isolate *isolate = args.GetIsolate();
