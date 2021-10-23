@@ -17,6 +17,9 @@
 #define IS_MACOS
 #endif
 
+const char *ARM64 = "arm64";
+const char *X64 = "x64";
+
 /* System, but with string replace */
 int run(const char *cmd, ...) {
     char buf[512];
@@ -53,15 +56,30 @@ void prepare() {
     }
 }
 
+/* Build boringssl */
+void build_boringssl() {
+
+#ifdef IS_MACOS
+    // build x64
+    run("cd uWebSockets/uSockets/boringssl && mkdir -p x64 && cd x64 && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_DEPLOYMENT_TARGET=10.14 .. && make -j8");
+
+    // build arm64 (cross compiling)
+    run("cd uWebSockets/uSockets/boringssl && mkdir -p arm64 && cd arm64 && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=arm64 .. && make -j8");
+
+#endif
+
+}
+
 /* Build for Unix systems */
 void build(char *compiler, char *cpp_compiler, char *cpp_linker, char *os, char *arch) {
+
     char *c_shared = "-DLIBUS_USE_LIBUV -I uWebSockets/uSockets/boringssl/include -pthread -DLIBUS_USE_OPENSSL -flto -O3 -c -fPIC -I uWebSockets/uSockets/src uWebSockets/uSockets/src/*.c uWebSockets/uSockets/src/eventing/*.c uWebSockets/uSockets/src/crypto/*.c";
     char *cpp_shared = "-DUWS_WITH_PROXY -DLIBUS_USE_LIBUV -I uWebSockets/uSockets/boringssl/include -pthread -DLIBUS_USE_OPENSSL -flto -O3 -c -fPIC -std=c++17 -I uWebSockets/uSockets/src -I uWebSockets/src src/addon.cpp uWebSockets/uSockets/src/crypto/sni_tree.cpp";
 
     for (unsigned int i = 0; i < sizeof(versions) / sizeof(struct node_version); i++) {
         run("%s %s -I targets/node-%s/include/node", compiler, c_shared, versions[i].name);
         run("%s %s -I targets/node-%s/include/node", cpp_compiler, cpp_shared, versions[i].name);
-        run("%s %s %s -o dist/uws_%s_%s_%s.node", cpp_compiler, "-pthread uWebSockets/uSockets/boringssl/build/ssl/libssl.a uWebSockets/uSockets/boringssl/build/crypto/libcrypto.a -flto -O3 *.o -std=c++17 -shared", cpp_linker, os, arch, versions[i].abi);
+        run("%s -pthread uWebSockets/uSockets/boringssl/%s/ssl/libssl.a uWebSockets/uSockets/boringssl/%s/crypto/libcrypto.a -flto -O3 *.o -std=c++17 -shared %s -o dist/uws_%s_%s_%s.node", cpp_compiler, arch, arch, cpp_linker, os, arch, versions[i].abi);
     }
 }
 
@@ -93,19 +111,22 @@ int main() {
     build_windows("x64");
 #else
 #ifdef IS_MACOS
+
+    build_boringssl();
+
     /* Apple special case */
     build("clang -mmacosx-version-min=10.14",
           "clang++ -stdlib=libc++ -mmacosx-version-min=10.14",
           "-undefined dynamic_lookup",
           OS,
-          "x64");
+          X64);
 
-        /* Try and build for arm64 macOS 11 */
-        build("clang -target arm64-apple-macos11",
+    /* Try and build for arm64 macOS 11 */
+    build("clang -target arm64-apple-macos11",
           "clang++ -stdlib=libc++ -target arm64-apple-macos11",
           "-undefined dynamic_lookup",
           OS,
-          "arm64");
+          ARM64);
 
 #else
     /* Linux */
@@ -113,10 +134,14 @@ int main() {
           "clang++",
           "-static-libstdc++ -static-libgcc -s",
           OS,
-          "x64");
+          X64);
 
     /* If linux we also want arm64 */
-    build("aarch64-linux-gnu-gcc", "aarch64-linux-gnu-g++", "-static-libstdc++ -static-libgcc -s", OS, "arm64");
+    build("aarch64-linux-gnu-gcc",
+        "aarch64-linux-gnu-g++",
+        "-static-libstdc++ -static-libgcc -s",
+        OS,
+        ARM64);
 #endif
 #endif
 
