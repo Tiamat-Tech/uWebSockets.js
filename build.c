@@ -74,6 +74,11 @@ void build_boringssl() {
     /* Build for arm64 (cross compile) */
     //run("cd uWebSockets/uSockets/boringssl && mkdir -p arm64 && cd arm64 && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=arm64 .. && make crypto ssl");
 #endif
+    
+#ifdef IS_WINDOWS
+    /* Build for x64 (the host) */
+    run("cd uWebSockets/uSockets/boringssl && mkdir -p x64 && cd x64 && cmake -DCMAKE_BUILD_TYPE=Release -GNinja .. && ninja crypto ssl");
+#endif
 
 }
 
