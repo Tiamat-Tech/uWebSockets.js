@@ -60,12 +60,19 @@ void prepare() {
 void build_boringssl() {
 
 #ifdef IS_MACOS
-    // build x64
+    /* Build for x64 (the host) */
     run("cd uWebSockets/uSockets/boringssl && mkdir -p x64 && cd x64 && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_DEPLOYMENT_TARGET=10.14 .. && make crypto ssl");
-
-    // build arm64 (cross compiling)
-    run("cd uWebSockets/uSockets/boringssl && mkdir -p arm64 && cd arm64 && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=arm64 .. && make crypto ssl -j8");
-
+    
+    /* Build for arm64 (cross compile) */
+    run("cd uWebSockets/uSockets/boringssl && mkdir -p arm64 && cd arm64 && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=arm64 .. && make crypto ssl");
+#endif
+    
+#ifdef IS_LINUX
+    /* Build for x64 (the host) */
+    run("cd uWebSockets/uSockets/boringssl && mkdir -p x64 && cd x64 && cmake -DCMAKE_BUILD_TYPE=Release .. && make crypto ssl");
+    
+    /* Build for arm64 (cross compile) */
+    //run("cd uWebSockets/uSockets/boringssl && mkdir -p arm64 && cd arm64 && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=arm64 .. && make crypto ssl");
 #endif
 
 }
@@ -106,13 +113,14 @@ int main() {
     printf("[Preparing]\n");
     prepare();
     printf("\n[Building]\n");
+    
+    /* Build for x64, arm64 */
+    build_boringssl();
 
 #ifdef IS_WINDOWS
     build_windows("x64");
 #else
 #ifdef IS_MACOS
-
-    build_boringssl();
 
     /* Apple special case */
     build("clang -mmacosx-version-min=10.14",
@@ -137,11 +145,11 @@ int main() {
           X64);
 
     /* If linux we also want arm64 */
-    build("aarch64-linux-gnu-gcc",
+    /*build("aarch64-linux-gnu-gcc",
         "aarch64-linux-gnu-g++",
         "-static-libstdc++ -static-libgcc -s",
         OS,
-        ARM64);
+        ARM64);*/
 #endif
 #endif
 
