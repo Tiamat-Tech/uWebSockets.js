@@ -106,7 +106,10 @@ void copy_files() {
 /* Special case for windows */
 void build_windows(char *arch) {
     
-    
+    run("clang.exe --version");
+    run("clang --version");
+    run("clang++.exe --version");
+    run("clang++ --version");
     
     char *c_shared = "/D LIBUS_USE_LIBUV /I uWebSockets/uSockets/boringssl/include /D LIBUS_USE_OPENSSL /I uWebSockets/uSockets/src uWebSockets/uSockets/src/*.c uWebSockets/uSockets/src/eventing/*.c uWebSockets/uSockets/src/crypto/*.c";
     
