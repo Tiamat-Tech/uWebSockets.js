@@ -111,7 +111,7 @@ void build_windows(char *compiler, char *cpp_compiler, char *cpp_linker, char *o
     //run("clang++.exe --version");
     //run("clang++ --version");
     
-    char *c_shared = "-DLIBUS_USE_LIBUV -I uWebSockets/uSockets/boringssl/include -pthread -DLIBUS_USE_OPENSSL -flto -O3 -c -I uWebSockets/uSockets/src uWebSockets/uSockets/src/*.c uWebSockets/uSockets/src/eventing/*.c uWebSockets/uSockets/src/crypto/*.c";
+    char *c_shared = "-DWIN32_LEAN_AND_MEAN -DLIBUS_USE_LIBUV -I uWebSockets/uSockets/boringssl/include -pthread -DLIBUS_USE_OPENSSL -flto -O3 -c -I uWebSockets/uSockets/src uWebSockets/uSockets/src/*.c uWebSockets/uSockets/src/eventing/*.c uWebSockets/uSockets/src/crypto/*.c";
     //char *cpp_shared = "-DUWS_WITH_PROXY -DLIBUS_USE_LIBUV -I uWebSockets/uSockets/boringssl/include -pthread -DLIBUS_USE_OPENSSL -flto -O3 -c -std=c++17 -I uWebSockets/uSockets/src -I uWebSockets/src src/addon.cpp uWebSockets/uSockets/src/crypto/sni_tree.cpp";
 
     for (unsigned int i = 0; i < sizeof(versions) / sizeof(struct node_version); i++) {
