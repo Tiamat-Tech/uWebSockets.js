@@ -72,7 +72,7 @@ void build_boringssl() {
     run("cd uWebSockets/uSockets/boringssl && mkdir -p x64 && cd x64 && cmake -DCMAKE_BUILD_TYPE=Release .. && make crypto ssl");
     
     /* Build for arm64 (cross compile) */
-    //run("cd uWebSockets/uSockets/boringssl && mkdir -p arm64 && cd arm64 && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=arm64 .. && make crypto ssl");
+    run("cd uWebSockets/uSockets/boringssl && mkdir -p arm64 && cd arm64 && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc -DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++ .. && make crypto ssl");
 #endif
     
 #ifdef IS_WINDOWS
@@ -150,11 +150,11 @@ int main() {
           X64);
 
     /* If linux we also want arm64 */
-    /*build("aarch64-linux-gnu-gcc",
+    build("aarch64-linux-gnu-gcc",
         "aarch64-linux-gnu-g++",
         "-static-libstdc++ -static-libgcc -s",
         OS,
-        ARM64);*/
+        ARM64);
 #endif
 #endif
 
