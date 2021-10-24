@@ -105,13 +105,26 @@ void copy_files() {
 
 /* Special case for windows */
 void build_windows(char *arch) {
-    /* For all versions */
+    
+    
+    
+    char *c_shared = "/D LIBUS_USE_LIBUV /I uWebSockets/uSockets/boringssl/include /D LIBUS_USE_OPENSSL /I uWebSockets/uSockets/src uWebSockets/uSockets/src/*.c uWebSockets/uSockets/src/eventing/*.c uWebSockets/uSockets/src/crypto/*.c";
+    
     for (unsigned int i = 0; i < sizeof(versions) / sizeof(struct node_version); i++) {
-        run("cl /W3 /D \"UWS_WITH_PROXY\" /D \"LIBUS_USE_LIBUV\" /I uWebSockets/uSockets/boringssl/include /D \"LIBUS_USE_OPENSSL\" /std:c++17 /I uWebSockets/uSockets/src uWebSockets/uSockets/src/*.c uWebSockets/uSockets/src/crypto/sni_tree.cpp "
-            "uWebSockets/uSockets/src/eventing/*.c uWebSockets/uSockets/src/crypto/*.c /I targets/node-%s/include/node /I uWebSockets/src /EHsc "
-            "/Ox /LD /Fedist/uws_win32_%s_%s.node src/addon.cpp uWebSockets/uSockets/boringssl/x64/ssl/ssl.lib uWebSockets/uSockets/boringssl/x64/crypto/crypto.lib targets/node-%s/node.lib",
-            versions[i].name, arch, versions[i].abi, versions[i].name);
+        run("%s %s /I targets/node-%s/include/node", "cl /c ", c_shared, versions[i].name);
     }
+    
+    
+    
+    
+    
+    /* For all versions */
+    //for (unsigned int i = 0; i < sizeof(versions) / sizeof(struct node_version); i++) {
+        //run("cl /W3 /D \"UWS_WITH_PROXY\" /D \"LIBUS_USE_LIBUV\" /I uWebSockets/uSockets/boringssl/include /D \"LIBUS_USE_OPENSSL\" /std:c++17 /I uWebSockets/uSockets/src uWebSockets/uSockets/src/*.c uWebSockets/uSockets/src/crypto/sni_tree.cpp "
+            //"uWebSockets/uSockets/src/eventing/*.c uWebSockets/uSockets/src/crypto/*.c /I targets/node-%s/include/node /I uWebSockets/src /EHsc "
+            //"/Ox /LD /Fedist/uws_win32_%s_%s.node src/addon.cpp uWebSockets/uSockets/boringssl/x64/ssl/ssl.lib uWebSockets/uSockets/boringssl/x64/crypto/crypto.lib targets/node-%s/node.lib",
+            //versions[i].name, arch, versions[i].abi, versions[i].name);
+    //}
 }
 
 int main() {
