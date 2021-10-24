@@ -104,18 +104,27 @@ void copy_files() {
 }
 
 /* Special case for windows */
-void build_windows(char *arch) {
+void build_windows(char *compiler, char *cpp_compiler, char *cpp_linker, char *os, const char *arch) {
     
-    run("clang.exe --version");
-    run("clang --version");
-    run("clang++.exe --version");
-    run("clang++ --version");
+    //run("clang.exe --version");
+    //run("clang --version");
+    //run("clang++.exe --version");
+    //run("clang++ --version");
     
-    char *c_shared = "/D LIBUS_USE_LIBUV /I uWebSockets/uSockets/boringssl/include /D LIBUS_USE_OPENSSL /I uWebSockets/uSockets/src uWebSockets/uSockets/src/*.c uWebSockets/uSockets/src/eventing/*.c uWebSockets/uSockets/src/crypto/*.c";
-    
+    char *c_shared = "-DLIBUS_USE_LIBUV -I uWebSockets/uSockets/boringssl/include -pthread -DLIBUS_USE_OPENSSL -flto -O3 -c -fPIC -I uWebSockets/uSockets/src uWebSockets/uSockets/src/*.c uWebSockets/uSockets/src/eventing/*.c uWebSockets/uSockets/src/crypto/*.c";
+    //char *cpp_shared = "-DUWS_WITH_PROXY -DLIBUS_USE_LIBUV -I uWebSockets/uSockets/boringssl/include -pthread -DLIBUS_USE_OPENSSL -flto -O3 -c -fPIC -std=c++17 -I uWebSockets/uSockets/src -I uWebSockets/src src/addon.cpp uWebSockets/uSockets/src/crypto/sni_tree.cpp";
+
     for (unsigned int i = 0; i < sizeof(versions) / sizeof(struct node_version); i++) {
-        run("%s %s /I targets/node-%s/include/node", "cl /c ", c_shared, versions[i].name);
+        run("%s %s -I targets/node-%s/include/node", compiler, c_shared, versions[i].name);
+        //run("%s %s -I targets/node-%s/include/node", cpp_compiler, cpp_shared, versions[i].name);
+        //run("%s -pthread uWebSockets/uSockets/boringssl/%s/ssl/libssl.a uWebSockets/uSockets/boringssl/%s/crypto/libcrypto.a -flto -O3 *.o -std=c++17 -shared %s -o dist/uws_%s_%s_%s.node", cpp_compiler, arch, arch, cpp_linker, os, arch, versions[i].abi);
     }
+    
+    //char *c_shared = "/D LIBUS_USE_LIBUV /I uWebSockets/uSockets/boringssl/include /D LIBUS_USE_OPENSSL /I uWebSockets/uSockets/src uWebSockets/uSockets/src/*.c uWebSockets/uSockets/src/eventing/*.c uWebSockets/uSockets/src/crypto/*.c";
+    
+    //for (unsigned int i = 0; i < sizeof(versions) / sizeof(struct node_version); i++) {
+        //run("%s %s /I targets/node-%s/include/node", "cl /c ", c_shared, versions[i].name);
+    //}
     
     
     
@@ -139,7 +148,11 @@ int main() {
     build_boringssl();
 
 #ifdef IS_WINDOWS
-    build_windows("x64");
+    build_windows("clang",
+                 "clang++",
+                 "",
+                 OS,
+                 X64);
 #else
 #ifdef IS_MACOS
 
